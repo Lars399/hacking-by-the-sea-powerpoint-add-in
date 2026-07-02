@@ -1,23 +1,55 @@
-# hacking-by-the-sea-powerpoint-add-in
-This is a powerpoint add-in we had to make during the Hacking By The Sea hackaton from the HZ HBO-ICT course
+# Slidessibility - Accessibility Checker for PowerPoint Presentations
 
-# Assignment:
-Slidessibility
+## Overview
+Tooling to treat accessibility as continuous engineering for .pptx files, focused on WCAG 2.2 compliance for public-sector presentations (Dutch government requirements via EN 301 549 and Tijdelijk besluit digitale toegankelijkheid overheid).
 
-Track: Software Engineering
+**Core Features:**
+- CLI for inspecting .pptx files
+- Severity-ranked accessibility findings
+- Actionable fix hints tied to WCAG success criteria
+- Baseline mechanism for managing pre-existing issues
+- Future: PowerPoint Add-in for in-app checking
 
-Contact: Tim Kardol & Valeria Stamenova
+## Project Structure
+```
+slidessibility/
+├── README.md
+├── pyproject.toml          # or requirements.txt
+├── src/
+│   └── slidessibility/
+│       ├── __init__.py
+│       ├── cli.py
+│       ├── checker.py      # Core accessibility checks
+│       ├── rules/          # WCAG-inspired rules
+│       └── reports/        # Report generation
+├── tests/
+├── examples/
+│   └── sample.pptx
+├── docs/
+└── .github/workflows/      # CI integration
+```
 
-Number of teams: 1
+## Quick Start
+```bash
+pip install -e .
+slidessibility check presentation.pptx
+```
 
-Problem Statement: Dutch public-sector websites are legally required to meet WCAG 2.2 through EN 301 549 and the Tijdelijk besluit digitale toegankelijkheid overheid, yet accessibility is usually checked once, by hand, late in the process – and then quietly regresses with the next release. Developers experience it as a one-off audit event rather than an everyday engineering practice. The common scanners (axe-core, Lighthouse) are useful but catch only part of the picture and rarely live where regressions are actually introduced: the commit and the pull request.
+## Inspiration
+- axe-core (web)
+- python-pptx for PPTX parsing
+- WCAG 2.2, ARIA practices adapted to slides
+```
 
-Goal: Build tooling that treats accessibility as continuous engineering rather than an annual report. Lecturing slides should be accessible to everyone - Build a CLI that checks that inspects .pptx files directly via structure and flags accessibility defects. Output severity-ranked findings with fix hints, mirroring the format used for the web-based tracks.
+## Installation
+1. Clone the repo
+2. `pip install -e .`
+3. Run checks on your slides
 
-Challenge: Instead of relying on a CLI that checks the exported PDF or the saved PPTX file, create a PowerPoint Add-in (in-app checking) that can highlight the issues in the presentation on the go.
-
-Deliverables: Real developer tooling, not a one-off report: severity-ranked findings, actionable fix hints tied to specific WCAG success criteria, and a baseline mechanism so a team can adopt the gate without drowning in pre-existing debt. Include a sample integration against at least one real site and clear docs for wiring it into a pipeline.
-
-User group: Screen-reader users, keyboard-only users, visually impaired users, and the developers who maintain these public-sector sites.
-
-Inspiration: WCAG 2.2, axe-core, EN 301 549, DigiToegankelijk.nl, Playwright / Puppeteer, Lighthouse CI, GitHub Actions, accessibility tree / ARIA
+## WCAG Focus Areas for Slides
+- 1.1 Text Alternatives (alt text for images)
+- 1.3 Adaptable (reading order, structure)
+- 1.4 Distinguishable (color contrast, text resize)
+- 2.4 Navigable (slide titles, logical order)
+- 3.1 Readable
+- And more...

@@ -44,8 +44,19 @@ class AccessibilityChecker:
     def _check_alt_text(self, slide, slide_num: int) -> List[Finding]:
         findings = []
         for shape_idx, shape in enumerate(slide.shapes):
-            if shape.has_picture or (hasattr(shape, 'image') and shape.image):
-                if not getattr(shape, 'alt_text', None) or not shape.alt_text.strip():
+            # Safely check for pictures/images (avoid errors on placeholders, text boxes, etc.)
+            is_image = False
+            if hasattr(shape, 'has_picture') and shape.has_picture:
+                is_image = True
+            elif hasattr(shape, 'image') and shape.image is not None:
+                is_image = True
+            # Also check shape type for pictures
+            elif hasattr(shape, 'shape_type') and str(shape.shape_type) in ['PICTURE', 'PICTURE_FRAME']:
+                is_image = True
+
+            if is_image:
+                alt_text = getattr(shape, 'alt_text', None)
+                if not alt_text or not str(alt_text).strip():
                     findings.append(Finding(
                         severity="serious",
                         rule_id="IMG_ALT",
@@ -53,7 +64,7 @@ class AccessibilityChecker:
                         message=f"Image on slide {slide_num} missing alt text",
                         slide_number=slide_num,
                         location=f"Slide {slide_num} - Shape {shape_idx}",
-                        fix_hint="Add descriptive alt text via Shape Format > Alt Text. Be concise but informative for screen readers."
+                        fix_hint="Right-click image → Format Picture → Alt Text. Add concise but meaningful description for screen readers."
                     ))
         return findings
 

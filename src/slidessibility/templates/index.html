@@ -15,15 +15,15 @@
 <body class="bg-light py-5">
 
     <div class="container-fluid px-5">
-        <h1 class="mb-5 text-center fw-bold text-secondary">Toegankelijkheidscontrole Dashboard</h1>
+        <h1 class="mb-5 text-center fw-bold text-secondary">Accessibility Dashboard</h1>
         
         <div class="row g-4">
             
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm p-4">
-                    <h3 class="h5 mb-4 fw-bold text-primary">Stap 1: Upload Bestand</h3>
+                    <h3 class="h5 mb-4 fw-bold text-primary">Step 1: Upload the file</h3>
                     <div class="mb-3">
-                        <label for="fileInput" class="form-label text-muted">Kies een PowerPoint (.pptx) of PDF (.pdf)</label>
+                        <label for="fileInput" class="form-label text-muted">pick a PowerPoint (.pptx) or PDF (.pdf)</label>
                         <input class="form-control" type="file" id="fileInput" accept=".pptx, .pdf">
                     </div>
                     <div id="fileInfo" class="text-muted small"></div>
@@ -32,21 +32,21 @@
 
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm p-4 d-flex flex-column justify-content-center align-items-center">
-                    <h3 class="h5 mb-4 w-100 text-center fw-bold text-primary">Stap 2: Start Controle</h3>
+                    <h3 class="h5 mb-4 w-100 text-center fw-bold text-primary">Step 2: Start the check</h3>
                     <button onclick="runCheck('pptx')" class="btn btn-primary btn-lg w-100 mb-3 py-3 shadow-sm">
-                        Controleer PowerPoint
+                        Check PowerPoint
                     </button>
                     <button onclick="runCheck('pdf')" class="btn btn-danger btn-lg w-100 py-3 shadow-sm">
-                        Controleer PDF
+                        Check PDF
                     </button>
                 </div>
             </div>
 
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm p-4">
-                    <h3 class="h5 mb-4 fw-bold text-primary">Stap 3: Resultaten</h3>
+                    <h3 class="h5 mb-4 fw-bold text-primary">Step 3: Results</h3>
                     <div id="outputArea" class="output-scroll border rounded p-3 bg-white h-100" style="min-height: 250px;">
-                        <span class="text-muted">Wachtend op start controle...</span>
+                        <span class="text-muted">waiting to start the check...</span>
                     </div>
                 </div>
             </div>
@@ -60,7 +60,7 @@
             const outputArea = document.getElementById('outputArea');
             
             if (fileInput.files.length === 0) {
-                outputArea.innerHTML = `<div class="alert alert-warning">⚠️ Selecteer eerst een bestand in kolom 1!</div>`;
+                outputArea.innerHTML = `<div class="alert alert-warning">⚠️ select a file first!</div>`;
                 return;
             }
 
@@ -72,7 +72,7 @@
             outputArea.innerHTML = `
                 <div class="text-center my-4">
                     <div class="spinner-border text-primary" role="status"></div>
-                    <div class="mt-2 text-primary fw-bold">Bezig met controleren van de ${type.toUpperCase()}...</div>
+                    <div class="mt-2 text-primary fw-bold">Doing the control of ${type.toUpperCase()}...</div>
                 </div>`;
 
             try {
@@ -84,7 +84,7 @@
                 const data = await response.json();
                 
                 if (!response.ok) {
-                    outputArea.innerHTML = `<div class="alert alert-danger"><strong>Fout:</strong><br>${data.error}</div>`;
+                    outputArea.innerHTML = `<div class="alert alert-danger"><strong>Error:</strong><br>${data.error}</div>`;
                     return;
                 }
 
@@ -93,13 +93,13 @@
                     outputArea.innerHTML = `
                         <div class="alert alert-success text-center py-4">
                             <h5>🎉 Gefeliciteerd!</h5>
-                            <p class="mb-0">Er zijn geen toegankelijkheidsfouten gevonden in dit bestand.</p>
+                            <p class="mb-0">There are no problems found in this document.</p>
                         </div>`;
                     return;
                 }
 
                 // Genereer HTML voor alle findings uit jouw Python script
-                let htmlOutput = `<h6 class="text-muted mb-3">Aantal bevindingen: ${findings.length}</h6>`;
+                let htmlOutput = `<h6 class="text-muted mb-3">Amount of findings: ${findings.length}</h6>`;
                 
                 findings.forEach(f => {
                     // Bepaal de kleur van het kaartje op basis van jouw severity
@@ -120,11 +120,11 @@
                                 </div>
                                 <h6 class="card-title fw-bold mb-1">${f.message}</h6>
                                 <p class="card-text mb-2 small text-muted">
-                                    <strong>Locatie:</strong> ${f.location} <br>
+                                    <strong>Location:</strong> ${f.location} <br>
                                     <strong>WCAG:</strong> ${f.wcag_criterion}
                                 </p>
                                 <div class="bg-light p-2 rounded small border">
-                                    <strong>Oplossing:</strong> ${f.fix_hint}
+                                    <strong>Solution:</strong> ${f.fix_hint}
                                 </div>
                             </div>
                         </div>`;
@@ -133,7 +133,7 @@
                 outputArea.innerHTML = htmlOutput;
 
             } catch (error) {
-                outputArea.innerHTML = `<div class="alert alert-danger"><strong>Netwerkfout:</strong><br>Kan geen verbinding maken met de backend server.</div>`;
+                outputArea.innerHTML = `<div class="alert alert-danger"><strong>Netwerkfout:</strong><br>Can't connect ot the backend server</div>`;
             }
         }
     </script>

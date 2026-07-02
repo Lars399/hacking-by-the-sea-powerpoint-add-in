@@ -1,9 +1,10 @@
-﻿using System;
-
-namespace Slidessibility.Core
+﻿namespace Slidessibility.Core
 {
-    public class Class1
+    public class AccessibilityEngine
     {
-
+        public static string TestConnection()
+        {
+            return "Hello from Slidessibility.Core! The linkage works perfectly.";
+        }
     }
 }

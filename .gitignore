@@ -55,3 +55,26 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# ==========================================
+# Office / VSTO Development Additions
+# ==========================================
+# Office temporary owner files (created when a test PPTX is open)
+~$*.pptx
+~$*.ppt
+
+# Visual Studio user-specific VSTO debug/deployment settings
+*.csproj.user
+*.vbproj.user
+*.suo
+*.user
+
+# VSTO auto-generated publication/signing security artifacts
+# (Keep your actual source certificate if you use one, but ignore the build outputs)
+*.manifest
+*.vsto
+
+# Resharper / Rider / Visual Studio Cache folders
+.vs/
+_ReSharper*/
+*.dtb.cache

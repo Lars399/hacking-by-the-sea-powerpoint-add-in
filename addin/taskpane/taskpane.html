@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <title>Slidessibility</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 15px; }
+        button { margin: 10px 0; padding: 8px 16px; }
+        #results { margin-top: 15px; max-height: 600px; overflow-y: auto; }
+        .finding { margin: 8px 0; padding: 10px; border-left: 4px solid; border-radius: 4px; }
+        .critical { border-color: #d13438; background: #fdf3f4; }
+        .serious { border-color: #e98300; background: #fff4ea; }
+    </style>
+</head>
+<body>
+    <h2>Slidessibility Accessibility Checker</h2>
+    <button onclick="checkAccessibility()">Run Accessibility Check</button>
+    <button onclick="clearResults()">Clear Results</button>
+    
+    <div id="status"></div>
+    <div id="results"></div>
+
+    <script src="taskpane.js"></script>
+</body>
+</html>

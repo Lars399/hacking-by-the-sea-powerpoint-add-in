@@ -1,55 +1,52 @@
-import argparse
-import sys
 from pathlib import Path
-from rich.console import Console
-from rich.table import Table
-
+import sys
 from .checker import AccessibilityChecker
-from .reports import generate_report
-
-console = Console()
+from .pdf_checker import PDFAccessibilityChecker
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Slidessibility: Accessibility checker for .pptx files"
-    )
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
-    # Check command
-    check_parser = subparsers.add_parser("check", help="Check a .pptx file for accessibility issues")
-    check_parser.add_argument("pptx_file", type=Path, help="Path to the .pptx file to check")
-    check_parser.add_argument("--baseline", type=Path, help="Path to baseline JSON file")
-    check_parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
-    check_parser.add_argument("--output", type=Path, help="Output file for report")
-
-    args = parser.parse_args()
-
-    if args.command == "check":
-        if not args.pptx_file.exists():
-            console.print(f"[red]Error: File {args.pptx_file} not found[/red]")
-            sys.exit(1)
-
-        checker = AccessibilityChecker()
-        findings = checker.check_pptx(args.pptx_file)
-
-        # TODO: Apply baseline filtering
-
-        if args.format == "json":
-            import json
-            report = generate_report(findings, "json")
-            if args.output:
-                args.output.write_text(json.dumps(report, indent=2))
-            else:
-                print(json.dumps(report, indent=2))
-        else:
-            report_text = generate_report(findings, args.format)
-            if args.output:
-                args.output.write_text(report_text)
-            else:
-                console.print(report_text)
-    else:
-        console.print("[red]Unknown command. Use 'slidessibility check <file>'[/red]")
+    if len(sys.argv) < 3 or sys.argv[1] != "check":
+        print("Usage: slidessibility check <file.pptx or file.pdf>")
+        print("Example: slidessibility check examples/Lesson.pptx")
         sys.exit(1)
+
+    file_path = Path(sys.argv[2])
+
+    if not file_path.exists():
+        print(f"❌ File not found: {file_path}")
+        print(f"   Current directory: {Path.cwd()}")
+        sys.exit(1)
+
+    suffix = file_path.suffix.lower()
+
+    if suffix == ".pptx":
+        checker = AccessibilityChecker()
+        findings = checker.check_pptx(file_path)
+        tool_name = "PowerPoint"
+
+    elif suffix == ".pdf":
+        checker = PDFAccessibilityChecker()
+        findings = checker.check_pdf(file_path)
+        tool_name = "PDF"
+
+    else:
+        print(f"❌ Unsupported file type: {suffix}")
+        print("Supported: .pptx and .pdf")
+        sys.exit(1)
+
+    # Output
+    print(f"\n🔍 {tool_name} Accessibility Findings ({len(findings)} total)")
+    print("=" * 70)
+
+    if not findings:
+        print("✅ No accessibility issues found!")
+        return
+
+    for f in findings:
+        print(f"[{f.severity.upper()}] {f.message}")
+        print(f"    WCAG: {f.wcag_criterion}")
+        print(f"    Fix:  {f.fix_hint}")
+        print("-" * 60)
+
 
 if __name__ == "__main__":
     main()

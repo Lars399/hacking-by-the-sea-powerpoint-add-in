@@ -65,17 +65,27 @@ class AccessibilityChecker:
     def _check_alt_text(self, slide, slide_num: int) -> List[Finding]:
         findings = []
         for shape_idx, shape in enumerate(slide.shapes):
-            if self._is_image(shape):
-                alt_text = getattr(shape, 'alt_text', None) or ""
-                if not str(alt_text).strip() or "Picture" in str(alt_text):
-                    findings.append(Finding(
+            if shape.shape_type == 13: # 13 is the constant for PICTURE
+                # DEBUG: Print the raw XML attributes to see what is actually there
+                try:
+                    raw_descr = shape._element.nvPicPr.cNvPr.attrib.get("descr")
+                    print(f"DEBUG: Slide {slide_num}, Shape {shape_idx}, descr attribute: '{raw_descr}'")
+                except AttributeError:
+                    print(f"DEBUG: Slide {slide_num}, Shape {shape_idx}, No descr attribute found.")
+
+                # If raw_descr is None or empty, it's missing
+                alt_text = getattr(shape, 'alt_text', None) # Fallback if library updated
+
+                ##Check for None, empty string, or whitespace-only strings
+                if raw_descr is None or not str(raw_descr).strip():
+                     findings.append(Finding(
                         severity="serious",
                         rule_id="IMG_ALT",
                         wcag_criterion="1.1.1 Non-text Content",
                         message=f"Image on slide {slide_num} missing alt text",
                         slide_number=slide_num,
                         location=f"Slide {slide_num} - Shape {shape_idx}",
-                        fix_hint="Right-click image → Format Picture → Alt Text. Add meaningful description."
+                        fix_hint="Right-click image → Format Picture → Alt Text."
                     ))
         return findings
 

@@ -1,0 +1,13 @@
+README.md
+pyproject.toml
+src/slidessibility/__init__.py
+src/slidessibility/checker.py
+src/slidessibility/cli.py
+src/slidessibility/reports.py
+src/slidessibility.egg-info/PKG-INFO
+src/slidessibility.egg-info/SOURCES.txt
+src/slidessibility.egg-info/dependency_links.txt
+src/slidessibility.egg-info/entry_points.txt
+src/slidessibility.egg-info/requires.txt
+src/slidessibility.egg-info/top_level.txt
+tests/test_checker.py

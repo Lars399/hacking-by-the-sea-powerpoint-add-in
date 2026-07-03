@@ -4,26 +4,23 @@ from pathlib import Path
 from flask import Flask, render_template, request, jsonify
 from dataclasses import asdict
 
-# Zorg dat Python in de huidige map zoekt naar checker.py
+# Zorg dat Python in de huidige map zoekt naar de scripts
 current_dir = Path(__file__).parent.resolve()
 if str(current_dir) not in sys.path:
     sys.path.append(str(current_dir))
 
-# Importeer nu ZONDER de punt
-from checker import AccessibilityChecker
+# IMPORT AANPASSING: We importeren direct 'PDFAccessibilityChecker'
+from checker import AccessibilityChecker as PptxAccessibilityChecker
+from pdf_checker import PDFAccessibilityChecker  # <-- Dit is de juiste naam!
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Initialispython app.pyeer jouw checker
-checker = AccessibilityChecker()
-
-def check_pdf(filepath):
-    # TODO: Jouw echte PDF-logica (als je die al hebt)
-    # Deze functie retourneert nu nog een simpele tekst/lijst
-    return [{"severity": "minor", "rule_id": "PDF_DUMMY", "wcag_criterion": "N.v.t.", "message": f"PDF-check uitgevoerd voor {os.path.basename(filepath)}.", "slide_number": 0, "location": "Document", "fix_hint": "Geen actie vereist."}]
+# INITIALISATIE AANPASSING: Gebruik de juiste klassenaam
+pptx_checker = PptxAccessibilityChecker()
+pdf_checker = PDFAccessibilityChecker()
 
 @app.route('/')
 def index():
@@ -40,19 +37,23 @@ def process_file():
     if file.filename == '':
         return jsonify({'error': 'Geen bestand gekozen'}), 400
 
-    # Sla het bestand tijdelijk op
+    # Sla het bestand tijdelijk op in de uploads map
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
     file.save(filepath)
     path_obj = Path(filepath)
 
     try:
         if file_type == 'pptx':
-            # Roep jouw exacte script aan
-            raw_findings = checker.check_pptx(path_obj)
-            # Zet de Finding dataclasses om naar dictionaries zodat Flask ze als JSON kan versturen
+            # Roep de PowerPoint-checker aan
+            raw_findings = pptx_checker.check_pptx(path_obj)
             findings = [asdict(f) for f in raw_findings]
+            
         elif file_type == 'pdf':
-            findings = check_pdf(filepath)
+            # Roep de PDF-checker aan. 
+            # Note: als jouw PDF-klasse een andere methodenaam gebruikt (bijv. check_pdf ipv check_pptx), pas dit hieronder dan aan!
+            raw_findings = pdf_checker.check_pdf(path_obj) 
+            findings = [asdict(f) for f in raw_findings]
+            
         else:
             return jsonify({'error': 'Onbekend bestandstype'}), 400
             
@@ -62,7 +63,7 @@ def process_file():
         return jsonify({'error': f"Er ging iets mis tijdens de controle: {str(e)}"}), 500
         
     finally:
-        # Altijd netjes het geüploade bestand opruimen
+        # Netjes het tijdelijke bestand opruimen
         if path_obj.exists():
             os.remove(path_obj)
 

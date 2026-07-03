@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toegankelijkheidscontrole Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .output-scroll {
+            max-height: 65vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-light py-5">
+
+    <div class="container-fluid px-5">
+        <h1 class="mb-5 text-center fw-bold text-secondary">Accessibility Dashboard</h1>
+        
+        <div class="row g-4">
+            
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm p-4">
+                    <h3 class="h5 mb-4 fw-bold text-primary">Step 1: Upload the file</h3>
+                    <div class="mb-3">
+                        <label for="fileInput" class="form-label text-muted">pick a PowerPoint (.pptx) or PDF (.pdf)</label>
+                        <input class="form-control" type="file" id="fileInput" accept=".pptx, .pdf">
+                    </div>
+                    <div id="fileInfo" class="text-muted small"></div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm p-4 d-flex flex-column justify-content-center align-items-center">
+                    <h3 class="h5 mb-4 w-100 text-center fw-bold text-primary">Step 2: Start the check</h3>
+                    <button onclick="runCheck('pptx')" class="btn btn-primary btn-lg w-100 mb-3 py-3 shadow-sm">
+                        Check PowerPoint
+                    </button>
+                    <button onclick="runCheck('pdf')" class="btn btn-danger btn-lg w-100 py-3 shadow-sm">
+                        Check PDF
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm p-4">
+                    <h3 class="h5 mb-4 fw-bold text-primary">Step 3: Results</h3>
+                    <div id="outputArea" class="output-scroll border rounded p-3 bg-white h-100" style="min-height: 250px;">
+                        <span class="text-muted">waiting to start the check...</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        async function runCheck(type) {
+            const fileInput = document.getElementById('fileInput');
+            const outputArea = document.getElementById('outputArea');
+            
+            if (fileInput.files.length === 0) {
+                outputArea.innerHTML = `<div class="alert alert-warning">⚠️ select a file first!</div>`;
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', type);
+
+            outputArea.innerHTML = `
+                <div class="text-center my-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="mt-2 text-primary fw-bold">Doing the control of ${type.toUpperCase()}...</div>
+                </div>`;
+
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    outputArea.innerHTML = `<div class="alert alert-danger"><strong>Error:</strong><br>${data.error}</div>`;
+                    return;
+                }
+
+                const findings = data.findings;
+                if (findings.length === 0) {
+                    outputArea.innerHTML = `
+                        <div class="alert alert-success text-center py-4">
+                            <h5>🎉 Gefeliciteerd!</h5>
+                            <p class="mb-0">There are no problems found in this document.</p>
+                        </div>`;
+                    return;
+                }
+
+                // Genereer HTML voor alle findings uit jouw Python script
+                let htmlOutput = `<h6 class="text-muted mb-3">Amount of findings: ${findings.length}</h6>`;
+                
+                findings.forEach(f => {
+                    // Bepaal de kleur van het kaartje op basis van jouw severity
+                    let badgeColor = "bg-secondary";
+                    let borderLeft = "border-start border-5 border-secondary";
+                    
+                    if (f.severity === "critical") { badgeColor = "bg-danger"; borderLeft = "border-start border-5 border-danger"; }
+                    else if (f.severity === "serious") { badgeColor = "bg-warning text-dark"; borderLeft = "border-start border-5 border-warning"; }
+                    else if (f.severity === "moderate") { badgeColor = "bg-info text-dark"; borderLeft = "border-start border-5 border-info"; }
+                    else if (f.severity === "minor") { badgeColor = "bg-light text-dark text-border"; borderLeft = "border-start border-5 border-muted"; }
+
+                    htmlOutput += `
+                        <div class="card mb-3 ${borderLeft} shadow-sm">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge ${badgeColor} text-uppercase font-monospace small">${f.severity}</span>
+                                    <small class="text-muted fw-bold">${f.rule_id}</small>
+                                </div>
+                                <h6 class="card-title fw-bold mb-1">${f.message}</h6>
+                                <p class="card-text mb-2 small text-muted">
+                                    <strong>Location:</strong> ${f.location} <br>
+                                    <strong>WCAG:</strong> ${f.wcag_criterion}
+                                </p>
+                                <div class="bg-light p-2 rounded small border">
+                                    <strong>Solution:</strong> ${f.fix_hint}
+                                </div>
+                            </div>
+                        </div>`;
+                });
+
+                outputArea.innerHTML = htmlOutput;
+
+            } catch (error) {
+                outputArea.innerHTML = `<div class="alert alert-danger"><strong>Netwerkfout:</strong><br>Can't connect ot the backend server</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

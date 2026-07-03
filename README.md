@@ -17,8 +17,11 @@ slidessibility/
 ├── pyproject.toml          # or requirements.txt
 ├── src/
 │   └── slidessibility/
+        | /templates
+            |__ index.html
 │       ├── __init__.py
 │       ├── cli.py
+        |__ app.py
 │       ├── checker.py      # Core accessibility checks
 │       ├── rules/          # WCAG-inspired rules
 │       └── reports/        # Report generation
@@ -31,8 +34,16 @@ slidessibility/
 
 ## Quick Start
 ```bash
+install the following extensions:
+pip install typer 
+pip install pdfplumber pypdf 
 pip install -e .
-slidessibility check presentation.pptx
+pip install flask python-pptx
+
+After the extensions, run the following command:
+python app.py
+
+after that, open the website and you can use it
 ```
 
 ## Inspiration
